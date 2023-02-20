@@ -1,7 +1,20 @@
 <?php
+session_start();
+if( !isset($_SESSION["login"]) ){
+    header("Location: login.php");
+    exit;
+}
+
+
 require 'functions.php';
 
 $daftar_piutang = query("SELECT * FROM piutang");
+
+
+//tombol cari ditekan
+if ( isset($_POST["cari"]) ) {
+    $daftar_piutang = cari($_POST["keyword"]);
+}
 
 
 ?>
@@ -15,10 +28,22 @@ $daftar_piutang = query("SELECT * FROM piutang");
     <title>Halaman Admin</title>
 </head>
 <body>
-    
+   
+<a href="logout.php">Log Out</a>
+
 <h1>Daftar Piutang</h1>
 <a href="tambah.php">Tambah Data</a>
 <br><br>
+
+
+<form action="" method="post">
+    <input type="text" name="keyword" size="30" autofocus placeholder="Masukkan keyword pencarian..." autocomplete="off">
+    <button type="submit" name="cari">Search!</button>
+</form>
+
+<br>
+
+
 
 <table border="1" cellpadding="10" cellspacing="0"> 
 
@@ -29,9 +54,10 @@ $daftar_piutang = query("SELECT * FROM piutang");
         <th>Nomor Invoice</th>
         <th>Tanggal Input Data</th>
         <th>Tanggal Jatuh Tempo</th>
-        <th>Umur Piutang</th>
+        <th>Jangka Waktu Piutang</th>
         <th>Nominal</th>
         <th>Sisa Piutang</th>
+        <th>Pembayaran</th>
     </tr>
 <?php $i = 1; ?>
 <?php foreach( $daftar_piutang as $row) : ?>
@@ -45,13 +71,20 @@ $daftar_piutang = query("SELECT * FROM piutang");
         <td><?= $row["nomor_invoice"]; ?> </td>
         <td><?= $row["tanggal_input"]; ?> </td>
         <td><?= $row["tanggal_tempo"]; ?> </td>
-        <td><?= $row["umur_piutang"]; ?></td>
+        <td><?= selisih($row["tanggal_input"], $row["tanggal_tempo"]); ?></td>
         <td><?= $row["nominal"]; ?></td>
         <td><?= $row["sisa_piutang"]; ?></td>
+
+        <td>
+             <a href="formpembayaran.php?id=<?= $row["id"]; ?>">Form Pembayaran</a> |
+             <a href="formpembayaran.php?id=<?= $row["id"]; ?>">Rincian Pembayaran</a> |
+        </td>
     </tr>
     <?php $i++; ?>
 <?php endforeach; ?>
 </table>
+<?php ;?>
+
 
 </body>
 </html>
